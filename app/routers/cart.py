@@ -29,7 +29,9 @@ async def add_to_cart(item_data : schemas.CartItemCreat , db : AsyncSession = De
         db.add(new_cart)
         await db.commit()
         await db.refresh(new_cart)
-        cart_query = select(models.Cart).where(models.Cart.id == db_cart.id).options(selectinload(models.Cart.items))
+        cart_query = select(models.Cart).where(models.Cart.id == db_cart.id).options(
+    selectinload(models.Cart.items).selectinload(models.CartItem.product)
+)
         cart_result = await db.execute(cart_query)
         db_cart = cart_result.scalars().first()
         
@@ -41,11 +43,15 @@ async def add_to_cart(item_data : schemas.CartItemCreat , db : AsyncSession = De
         cart_item.quantity += item_data.quantity
     else:
         new_cart_item = models.CartItem(cart_id = db_cart.id , product_id = db_product.id , quantity = item_data.quantity)
-        await db.add(new_cart_item)
+        db.add(new_cart_item)
+    
+    db_product.stock -= item_data.quantity
 
     await db.commit()
 
-    final_cart_query = select(models.Cart).where(models.Cart.id == db_cart.id).options(selectinload(models.Cart.items))
+    final_cart_query = select(models.Cart).where(models.Cart.id == db_cart.id).options(
+    selectinload(models.Cart.items).selectinload(models.CartItem.product)
+)
     final_cart_result = await db.execute(final_cart_query)   
     return final_cart_result.scalars().first()
 
