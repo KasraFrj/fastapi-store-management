@@ -3,13 +3,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete , update
 from sqlalchemy.future import select
 from typing import List
-from app import models, schemas
+from app import models, schemas , oauth2
 from app.database import get_db
 
 router = APIRouter(prefix="/products" , tags=["Products"])
 
 @router.post("/create" , response_model=schemas.ProductOut)
-async def create_product(product_data : schemas.ProductCreate , db : AsyncSession = Depends(get_db)):
+async def create_product(product_data : schemas.ProductCreate , current_admin : models.User = Depends(oauth2.get_current_admin) , db : AsyncSession = Depends(get_db)):
     new_product = models.product(**product_data.model_dump())
     db.add(new_product)
     await db.commit()

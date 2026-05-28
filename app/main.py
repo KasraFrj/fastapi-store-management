@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-#models.Base.metadata.create_all(bind = engine)
+##models.Base.metadata.create_all(bind = engine)
 
 app = FastAPI(title="E-Commerce API")
 
